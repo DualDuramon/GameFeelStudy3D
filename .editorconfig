@@ -1,0 +1,63 @@
+root = true
+
+# 게임 코드에만 적용한다. Unity가 생성하는 스크립트/외부 코드는 대상이 아니다.
+[Assets/02.Scripts/**.cs]
+
+#### 들여쓰기 / 중괄호 ####
+indent_style = space
+indent_size = 4
+csharp_new_line_before_open_brace = all
+
+# 조기 리턴(단일 행)은 중괄호 없이 허용, 여러 줄일 때만 중괄호 강제
+csharp_prefer_braces = when_multiline:warning
+
+
+#### 이름 규칙 ####
+
+# 1. 공통 네이밍 스타일 정의
+
+# PascalCase
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+# _camelCase
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+
+# Pascal_Case_With_Underscore
+# 예: Cool_Time_Rate, Max_Player_Count
+dotnet_naming_style.pascal_underscore.capitalization = pascal_case
+dotnet_naming_style.pascal_underscore.word_separator = _
+
+
+# 2. private 필드 → _camelCase
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+dotnet_naming_rule.private_fields_underscore.severity = warning
+
+
+# 3. private const → Pascal_Case_With_Underscore
+dotnet_naming_symbols.private_constants.applicable_kinds = field
+dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.required_modifiers = const
+
+dotnet_naming_rule.private_constants_pascal_underscore.symbols = private_constants
+dotnet_naming_rule.private_constants_pascal_underscore.style = pascal_underscore
+dotnet_naming_rule.private_constants_pascal_underscore.severity = warning
+
+
+# 4. private static readonly → PascalCase
+dotnet_naming_symbols.private_static_readonly.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly.required_modifiers = static,readonly
+
+dotnet_naming_rule.private_static_readonly_pascal.symbols = private_static_readonly
+dotnet_naming_rule.private_static_readonly_pascal.style = pascal_case
+dotnet_naming_rule.private_static_readonly_pascal.severity = warning
+
+
+# 규칙 severity는 IDE에서만 존중되므로,
+# 빌드/dotnet format에서 잡히도록 진단 severity도 올린다.
+dotnet_diagnostic.IDE1006.severity = warning

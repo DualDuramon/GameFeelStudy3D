@@ -686,7 +686,7 @@ namespace RuntimeMeshSlicing
                     localPlane.ClosestPointOnPlane(
                         segment.pointB),
                     duplicateEpsilon);
-
+                 
                 if (indexA == indexB)
                 {
                     continue;
