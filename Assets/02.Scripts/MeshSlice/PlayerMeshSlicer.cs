@@ -8,7 +8,7 @@ public class PlayerMeshSlicer : MonoBehaviour
 
     [Header("Animation Settings")]
     [SerializeField] private Animator _animator;
-    [SerializeField] private const string Attaci_Trigger_Name = "AttackTrigger";
+    [SerializeField] private const string Attack_Trigger_Name = "AttackTrigger";
     private bool _canAttack = true;
 
     [Header("Camera Shaker")]
@@ -22,19 +22,19 @@ public class PlayerMeshSlicer : MonoBehaviour
 
     private void OnEnable()
     {
-        _input.OnNormalAttackEvent += HandleNormalAttack;
+        _input.OnNormalAttackEvent += HandleLeftClick;
     }
 
     private void OnDisable()
     {
-        _input.OnNormalAttackEvent -= HandleNormalAttack;
+        _input.OnNormalAttackEvent -= HandleLeftClick;
     }
 
-    private void HandleNormalAttack()
+    private void HandleLeftClick()
     {
-        if(_canAttack)
+        if(!_input.IsMouseClickLocked && _canAttack)
         {
-            _animator.SetTrigger(Attaci_Trigger_Name);
+            _animator.SetTrigger(Attack_Trigger_Name);
         }
     }
 

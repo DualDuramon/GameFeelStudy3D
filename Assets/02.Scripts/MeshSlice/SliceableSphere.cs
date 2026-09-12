@@ -40,9 +40,8 @@ namespace RuntimeMeshSlicing
         [Header("Recursive Slicing")]
         [SerializeField, Min(1)] private int _maximumSliceDepth = 2;
         [SerializeField, Min(0)] private int _currentSliceDepth;
-        
-        [Header("CameraShaker")]
-        [SerializeField] private CameraShakeSignalSender _cameraShakeSignalSender;
+        [Header("Post Effects")]
+        [SerializeField] private PostEffectExecuter _postEffectExecuter;
 
         private Mesh _sourceCollisionProxyMesh;
         private MeshFilter _sourceMeshFilter;
@@ -66,7 +65,7 @@ namespace RuntimeMeshSlicing
             _sourceMeshFilter = GetComponent<MeshFilter>();
             _sourceMeshRenderer = GetComponent<MeshRenderer>();
             _sourceRigidbody = GetComponent<Rigidbody>();
-            _cameraShakeSignalSender = GetComponent<CameraShakeSignalSender>();
+            _postEffectExecuter = GetComponent<PostEffectExecuter>();
             _state = SliceState.Ready;
         }
 
@@ -198,10 +197,10 @@ namespace RuntimeMeshSlicing
 
                 _state = SliceState.Sliced;
                 LastMessage = $"Slice completed successfully.{physicsNote}";
-                
-                if (_cameraShakeSignalSender != null)
+
+                if(_postEffectExecuter != null)
                 {
-                    _cameraShakeSignalSender.SendShakeSignal();
+                    _postEffectExecuter.ExecutePostEffects(request.contactPointWorld, Quaternion.LookRotation(request.planeNormalWorld), true);
                 }
                 gameObject.SetActive(false);
                 return true;
