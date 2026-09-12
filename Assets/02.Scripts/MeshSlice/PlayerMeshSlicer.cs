@@ -4,12 +4,15 @@ using RuntimeMeshSlicing;
 public class PlayerMeshSlicer : MonoBehaviour
 {
     [SerializeField] private PlayerMeshSlicerInput _input;
-    [SerializeField] private Animator _animator;
     [SerializeField] private AnimatedBladeSlicer[] _bladesSlicer;
 
+    [Header("Animation Settings")]
+    [SerializeField] private Animator _animator;
     [SerializeField] private const string Attaci_Trigger_Name = "AttackTrigger";
     private bool _canAttack = true;
 
+    [Header("Camera Shaker")]
+    [SerializeField] private CameraShakeSignalSender _cameraShakeSignalSender;
 
     private void Awake()
     {

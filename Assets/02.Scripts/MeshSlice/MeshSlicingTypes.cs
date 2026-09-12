@@ -193,6 +193,11 @@ namespace RuntimeMeshSlicing
                 capTriangles);
         }
 
+        internal bool AddSurfaceTriangle(SliceVertex vertexA, SliceVertex vertexB, SliceVertex vertexC, bool isCutSurface)
+        {
+            return isCutSurface ? AddCapTriangle(vertexA, vertexB, vertexC) : AddOuterTriangle(vertexA, vertexB, vertexC);
+        }
+
         private bool AddTriangle(
             SliceVertex vertexA,
             SliceVertex vertexB,

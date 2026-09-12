@@ -39,8 +39,9 @@ namespace RuntimeMeshSlicing
         private bool _sliceWindowOpen;
         private bool _hasPreviousPose;
         private bool _warnedAboutMissingBladePoints;
-
         public bool IsSliceWindowOpen => _sliceWindowOpen;
+        
+        
 
         private void Awake()
         {
@@ -208,11 +209,21 @@ namespace RuntimeMeshSlicing
             if (succeeded)
             {
                 _slicedTargetsThisSwing.Add(targetId);
+                AddChildToCurrentSwingIgnoreList(sliceable.LastPositiveChild);
+                AddChildToCurrentSwingIgnoreList(sliceable.LastNegativeChild);
                 _debugView?.RecordContour(sliceable.LastContourWorld);
                 return;
             }
 
             _debugView?.RecordRejection(sliceable.LastMessage);
+        }
+
+        private void AddChildToCurrentSwingIgnoreList(SliceableSphere child)
+        {
+            if (child != null)
+            {
+                _slicedTargetsThisSwing.Add(child.GetInstanceID());
+            }
         }
 
         private void CacheCurrentPose()

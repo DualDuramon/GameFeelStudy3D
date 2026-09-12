@@ -10,13 +10,7 @@ namespace RuntimeMeshSlicing
         private const int DefaultLongitudeSegments = 12;
         private const int DefaultLatitudeSegments = 6;
 
-        public static bool TryCreateSlicedProxy(
-            Bounds sourceBounds,
-            Plane localPlane,
-            SliceSettings settings,
-            out Mesh positiveProxy,
-            out Mesh negativeProxy,
-            out string failureMessage)
+        public static bool TryCreateSlicedProxy(Bounds sourceBounds, Plane localPlane, SliceSettings settings, out Mesh positiveProxy, out Mesh negativeProxy, out string failureMessage)
         {
             positiveProxy = null;
             negativeProxy = null;
@@ -26,47 +20,8 @@ namespace RuntimeMeshSlicing
 
             try
             {
-                sourceProxy = CreateSourceProxy(
-                    sourceBounds,
-                    DefaultLongitudeSegments,
-                    DefaultLatitudeSegments);
-
-                if (!SphereMeshSlicer.TrySlice(
-                        sourceProxy,
-                        localPlane,
-                        settings,
-                        out SliceGeometry proxyGeometry,
-                        out SliceDiagnostics diagnostics))
-                {
-                    failureMessage =
-                        $"Proxy slicing failed: {diagnostics.Message}";
-
-                    return false;
-                }
-
-                if (proxyGeometry.Positive.TotalTriangleCount >
-                    MaximumConvexTriangles ||
-                    proxyGeometry.Negative.TotalTriangleCount >
-                    MaximumConvexTriangles)
-                {
-                    failureMessage =
-                        "A generated proxy exceeded the 255-triangle " +
-                        "Convex MeshCollider limit.";
-
-                    return false;
-                }
-
-                positiveProxy =
-                    RuntimeMeshFactory.CreateColliderMesh(
-                        proxyGeometry.Positive,
-                        "Sphere_Positive_ColliderProxy");
-
-                negativeProxy =
-                    RuntimeMeshFactory.CreateColliderMesh(
-                        proxyGeometry.Negative,
-                        "Sphere_Negative_ColliderProxy");
-
-                return true;
+                sourceProxy = CreateSourceProxy(sourceBounds, DefaultLongitudeSegments, DefaultLatitudeSegments);
+                return TrySliceProxy(sourceProxy, localPlane, settings, out positiveProxy, out negativeProxy, out failureMessage);
             }
             catch (Exception exception)
             {
@@ -84,6 +39,54 @@ namespace RuntimeMeshSlicing
             finally
             {
                 DestroyRuntimeMesh(sourceProxy);
+            }
+        }
+
+        public static bool TrySliceExistingProxy(Mesh sourceProxy, Plane localPlane, SliceSettings settings, out Mesh positiveProxy, out Mesh negativeProxy, out string failureMessage)
+        {
+            if (sourceProxy == null)
+            {
+                positiveProxy = null;
+                negativeProxy = null;
+                failureMessage = "The existing collision proxy is missing.";
+                return false;
+            }
+
+            return TrySliceProxy(sourceProxy, localPlane, settings, out positiveProxy, out negativeProxy, out failureMessage);
+        }
+
+        private static bool TrySliceProxy(Mesh sourceProxy, Plane localPlane, SliceSettings settings, out Mesh positiveProxy, out Mesh negativeProxy, out string failureMessage)
+        {
+            positiveProxy = null;
+            negativeProxy = null;
+            failureMessage = string.Empty;
+
+            try
+            {
+                if (!SphereMeshSlicer.TrySlice(sourceProxy, localPlane, settings, out SliceGeometry proxyGeometry, out SliceDiagnostics diagnostics))
+                {
+                    failureMessage = $"Proxy slicing failed: {diagnostics.Message}";
+                    return false;
+                }
+
+                if (proxyGeometry.Positive.TotalTriangleCount > MaximumConvexTriangles || proxyGeometry.Negative.TotalTriangleCount > MaximumConvexTriangles)
+                {
+                    failureMessage = "A generated proxy exceeded the 255-triangle Convex MeshCollider limit.";
+                    return false;
+                }
+
+                positiveProxy = RuntimeMeshFactory.CreateColliderMesh(proxyGeometry.Positive, "Sphere_Positive_ColliderProxy");
+                negativeProxy = RuntimeMeshFactory.CreateColliderMesh(proxyGeometry.Negative, "Sphere_Negative_ColliderProxy");
+                return true;
+            }
+            catch (Exception exception)
+            {
+                DestroyRuntimeMesh(positiveProxy);
+                DestroyRuntimeMesh(negativeProxy);
+                positiveProxy = null;
+                negativeProxy = null;
+                failureMessage = $"Proxy creation failed: {exception.Message}";
+                return false;
             }
         }
 
