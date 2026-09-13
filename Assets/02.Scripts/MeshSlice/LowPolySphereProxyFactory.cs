@@ -90,29 +90,23 @@ namespace RuntimeMeshSlicing
             }
         }
 
-        private static Mesh CreateSourceProxy(
-            Bounds bounds,
-            int longitudeSegments,
-            int latitudeSegments)
+        private static Mesh CreateSourceProxy(Bounds bounds, int longitudeSegments, int latitudeSegments)
         {
             if (longitudeSegments < 3)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(longitudeSegments));
+                throw new ArgumentOutOfRangeException(nameof(longitudeSegments));
             }
 
             if (latitudeSegments < 2)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(latitudeSegments));
+                throw new ArgumentOutOfRangeException(nameof(latitudeSegments));
             }
 
             if (bounds.extents.x <= 0f ||
                 bounds.extents.y <= 0f ||
                 bounds.extents.z <= 0f)
             {
-                throw new InvalidOperationException(
-                    "The source mesh bounds are invalid.");
+                throw new InvalidOperationException("The source mesh bounds are invalid.");
             }
 
             List<Vector3> vertices = new();
@@ -128,43 +122,31 @@ namespace RuntimeMeshSlicing
             normals.Add(Vector3.up);
             uvs.Add(new Vector2(0.5f, 1f));
 
-            for (int latitude = 1;
-                 latitude < latitudeSegments;
-                 latitude++)
+            for (int latitude = 1; latitude < latitudeSegments; latitude++)
             {
-                float latitudeT =
-                    latitude / (float)latitudeSegments;
+                float latitudeT = latitude / (float)latitudeSegments;
 
-                float polarAngle =
-                    Mathf.PI * latitudeT;
+                float polarAngle = Mathf.PI * latitudeT;
 
                 float ringY = Mathf.Cos(polarAngle);
                 float ringRadius = Mathf.Sin(polarAngle);
 
-                for (int longitude = 0;
-                     longitude < longitudeSegments;
-                     longitude++)
+                for (int longitude = 0; longitude < longitudeSegments; longitude++)
                 {
-                    float longitudeT =
-                        longitude / (float)longitudeSegments;
+                    float longitudeT = longitude / (float)longitudeSegments;
 
-                    float azimuth =
-                        longitudeT * Mathf.PI * 2f;
+                    float azimuth = longitudeT * Mathf.PI * 2f;
 
                     Vector3 direction = new(
                         ringRadius * Mathf.Cos(azimuth),
                         ringY,
                         ringRadius * Mathf.Sin(azimuth));
 
-                    Vector3 position =
-                        center +
-                        Vector3.Scale(direction, extents);
+                    Vector3 position = center + Vector3.Scale(direction, extents);
 
                     vertices.Add(position);
                     normals.Add(direction.normalized);
-                    uvs.Add(new Vector2(
-                        longitudeT,
-                        1f - latitudeT));
+                    uvs.Add(new Vector2(longitudeT, 1f - latitudeT));
                 }
             }
 
@@ -176,26 +158,16 @@ namespace RuntimeMeshSlicing
 
             int RingIndex(int latitude, int longitude)
             {
-                int wrappedLongitude =
-                    (longitude + longitudeSegments) %
-                    longitudeSegments;
+                int wrappedLongitude = (longitude + longitudeSegments) % longitudeSegments;
 
-                return
-                    1 +
-                    (latitude - 1) * longitudeSegments +
-                    wrappedLongitude;
+                return 1 + (latitude - 1) * longitudeSegments + wrappedLongitude;
             }
 
             // Top fan.
-            for (int longitude = 0;
-                 longitude < longitudeSegments;
-                 longitude++)
+            for (int longitude = 0; longitude < longitudeSegments; longitude++)
             {
-                int current =
-                    RingIndex(1, longitude);
-
-                int next =
-                    RingIndex(1, longitude + 1);
+                int current = RingIndex(1, longitude);
+                int next = RingIndex(1, longitude + 1);
 
                 triangles.Add(0);
                 triangles.Add(next);
@@ -203,25 +175,15 @@ namespace RuntimeMeshSlicing
             }
 
             // Middle rings.
-            for (int latitude = 1;
-                 latitude < latitudeSegments - 1;
-                 latitude++)
+            for (int latitude = 1; latitude < latitudeSegments - 1; latitude++)
             {
-                for (int longitude = 0;
-                     longitude < longitudeSegments;
-                     longitude++)
+                for (int longitude = 0; longitude < longitudeSegments; longitude++)
                 {
-                    int upperCurrent =
-                        RingIndex(latitude, longitude);
-
-                    int upperNext =
-                        RingIndex(latitude, longitude + 1);
-
-                    int lowerCurrent =
-                        RingIndex(latitude + 1, longitude);
-
-                    int lowerNext =
-                        RingIndex(latitude + 1, longitude + 1);
+                    int upperCurrent = RingIndex(latitude, longitude);
+                    int upperNext = RingIndex(latitude, longitude + 1);
+                    
+                    int lowerCurrent = RingIndex(latitude + 1, longitude);
+                    int lowerNext = RingIndex(latitude + 1, longitude + 1);
 
                     triangles.Add(upperCurrent);
                     triangles.Add(upperNext);
@@ -234,30 +196,17 @@ namespace RuntimeMeshSlicing
             }
 
             // Bottom fan.
-            for (int longitude = 0;
-                 longitude < longitudeSegments;
-                 longitude++)
+            for (int longitude = 0; longitude < longitudeSegments; longitude++)
             {
-                int current =
-                    RingIndex(
-                        latitudeSegments - 1,
-                        longitude);
-
-                int next =
-                    RingIndex(
-                        latitudeSegments - 1,
-                        longitude + 1);
+                int current = RingIndex(latitudeSegments - 1, longitude);
+                int next = RingIndex(latitudeSegments - 1, longitude + 1);
 
                 triangles.Add(bottomIndex);
                 triangles.Add(current);
                 triangles.Add(next);
             }
 
-            Mesh mesh = new()
-            {
-                name = "LowPolySphereColliderSource",
-                hideFlags = HideFlags.HideAndDontSave
-            };
+            Mesh mesh = new Mesh() {name = "LowPolySphereColliderSource", hideFlags = HideFlags.HideAndDontSave};
 
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);

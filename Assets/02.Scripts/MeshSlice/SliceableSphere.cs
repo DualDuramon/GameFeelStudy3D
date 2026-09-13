@@ -84,11 +84,6 @@ namespace RuntimeMeshSlicing
 
         public bool TrySlice(in SliceRequest request)
         {
-            if(!GeneratePiece)
-            {
-                LastMessage = "SliceableSphere.GeneratePiece is disabled.";
-                return false;
-            }
             if (_state != SliceState.Ready)
             {
                 LastMessage = "This object is already slicing or has been sliced.";
@@ -111,7 +106,7 @@ namespace RuntimeMeshSlicing
                 return false;
             }
 
-            if (!SlicingMath.IsFinite(request.planeNormalWorld) || request.planeNormalWorld.sqrMagnitude < 0.00000001f)
+            if (!SlicingMath.IsFinite(request.PlaneNormalWorld) || request.PlaneNormalWorld.sqrMagnitude < 0.00000001f)
             {
                 LastMessage = "The requested world plane normal is invalid.";
                 return false;
@@ -129,8 +124,8 @@ namespace RuntimeMeshSlicing
 
             try
             {
-                Vector3 localPlanePoint = transform.InverseTransformPoint(request.contactPointWorld);
-                Vector3 localPlaneNormal = transform.InverseTransformDirection(request.planeNormalWorld).normalized;
+                Vector3 localPlanePoint = transform.InverseTransformPoint(request.ContactPointWorld);
+                Vector3 localPlaneNormal = transform.InverseTransformDirection(request.PlaneNormalWorld).normalized;
                 Plane localPlane = new(localPlaneNormal, localPlanePoint);
 
                 if (!SphereMeshSlicer.TrySlice(_sourceMeshFilter.sharedMesh, localPlane, _sliceSettings, out SliceGeometry geometry, out SliceDiagnostics diagnostics))
@@ -190,7 +185,7 @@ namespace RuntimeMeshSlicing
 
                 if (_addPhysicsToPieces)
                 {
-                    Vector3 worldPlaneNormal = request.planeNormalWorld.normalized;
+                    Vector3 worldPlaneNormal = request.PlaneNormalWorld.normalized;
 
                     if (positiveBody != null)
                     {
@@ -208,7 +203,7 @@ namespace RuntimeMeshSlicing
 
                 if(_postEffectExecuter != null)
                 {
-                    _postEffectExecuter.ExecutePostEffects(request.contactPointWorld, Quaternion.LookRotation(request.planeNormalWorld), true, GenerateJuices);
+                    _postEffectExecuter.ExecutePostEffects(request.ContactPointWorld, Quaternion.LookRotation(request.PlaneNormalWorld), true, GenerateJuices);
                 }
                 gameObject.SetActive(false);
                 return true;

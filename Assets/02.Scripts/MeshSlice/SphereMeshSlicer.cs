@@ -53,8 +53,8 @@ namespace RuntimeMeshSlicing
                 return false;
             }
 
-            MeshSideData positiveSide = new(settings.minimumTriangleAreaSquared);
-            MeshSideData negativeSide = new(settings.minimumTriangleAreaSquared);
+            MeshSideData positiveSide = new(settings.MinimumTriangleAreaSquared);
+            MeshSideData negativeSide = new(settings.MinimumTriangleAreaSquared);
             List<IntersectionSegment> intersectionSegments = new();
 
             for (int triangleIndex = 0; triangleIndex < triangles.Count; triangleIndex++)
@@ -77,12 +77,12 @@ namespace RuntimeMeshSlicing
                 };
 
                 float[] signedDistances = {
-                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[0].position), settings.distanceEpsilon),
-                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[1].position), settings.distanceEpsilon),
-                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[2].position), settings.distanceEpsilon)
+                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[0].Position), settings.DistanceEpsilon),
+                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[1].Position), settings.DistanceEpsilon),
+                    SnapDistance(localPlane.GetDistanceToPoint(triangleVertices[2].Position), settings.DistanceEpsilon)
                 };
                 SnapOnPlaneVertices(triangleVertices, signedDistances, localPlane);
-                TryCollectIntersectionSegment(triangleVertices, signedDistances, localPlane, settings.duplicatePositionEpsilon, intersectionSegments);
+                TryCollectIntersectionSegment(triangleVertices, signedDistances, localPlane, settings.DuplicatePositionEpsilon, intersectionSegments);
                 bool hasPositive = signedDistances[0] > 0f || signedDistances[1] > 0f || signedDistances[2] > 0f;
                 bool hasNegative = signedDistances[0] < 0f || signedDistances[1] < 0f || signedDistances[2] < 0f;
 
@@ -108,8 +108,8 @@ namespace RuntimeMeshSlicing
                 }
 
                 diagnostics.CrossingSourceTriangles++;
-                List<SliceVertex> positivePolygon = ClipTriangleToHalfSpace(triangleVertices, signedDistances, localPlane, keepPositive: true, settings.duplicatePositionEpsilon);
-                List<SliceVertex> negativePolygon = ClipTriangleToHalfSpace(triangleVertices, signedDistances, localPlane, keepPositive: false, settings.duplicatePositionEpsilon);
+                List<SliceVertex> positivePolygon = ClipTriangleToHalfSpace(triangleVertices, signedDistances, localPlane, keepPositive: true, settings.DuplicatePositionEpsilon);
+                List<SliceVertex> negativePolygon = ClipTriangleToHalfSpace(triangleVertices, signedDistances, localPlane, keepPositive: false, settings.DuplicatePositionEpsilon);
                 TriangulatePolygon(positivePolygon, positiveSide, sourceTriangle.isCutSurface);
                 TriangulatePolygon(negativePolygon, negativeSide, sourceTriangle.isCutSurface);
             }
@@ -122,7 +122,7 @@ namespace RuntimeMeshSlicing
                 return false;
             }
 
-            if (!TryBuildConvexContour(intersectionSegments, localPlane, settings.duplicatePositionEpsilon, out List<Vector3> sortedContour, out string contourFailure))
+            if (!TryBuildConvexContour(intersectionSegments, localPlane, settings.DuplicatePositionEpsilon, out List<Vector3> sortedContour, out string contourFailure))
             {
                 diagnostics.Fail(SliceFailureReason.InvalidContour, contourFailure);
                 return false;
@@ -130,7 +130,7 @@ namespace RuntimeMeshSlicing
 
             diagnostics.UniqueContourPointCount = sortedContour.Count;
 
-            if (!AppendCaps(sortedContour, localPlane, positiveSide, negativeSide, settings.duplicatePositionEpsilon))
+            if (!AppendCaps(sortedContour, localPlane, positiveSide, negativeSide, settings.DuplicatePositionEpsilon))
             {
                 diagnostics.Fail(SliceFailureReason.InvalidContour, "The cap polygon was degenerate and could not be triangulated.");
                 return false;
@@ -242,15 +242,15 @@ namespace RuntimeMeshSlicing
                     continue;
                 }
 
-                Vector3 snappedPosition = localPlane.ClosestPointOnPlane(vertices[index].position);
+                Vector3 snappedPosition = localPlane.ClosestPointOnPlane(vertices[index].Position);
                 vertices[index] = vertices[index].WithPosition(snappedPosition);
             }
         }
 
         private static void AddCoplanarTriangleToOneSide(SliceVertex[] triangle, Vector3 planeNormal, MeshSideData positiveSide, MeshSideData negativeSide, bool isCutSurface)
         {
-            Vector3 edgeAB = triangle[1].position - triangle[0].position;
-            Vector3 edgeAC = triangle[2].position - triangle[0].position;
+            Vector3 edgeAB = triangle[1].Position - triangle[0].Position;
+            Vector3 edgeAC = triangle[2].Position - triangle[0].Position;
             Vector3 faceNormal = Vector3.Cross(edgeAB, edgeAC);
 
             if (Vector3.Dot(faceNormal, planeNormal) >= 0f)
@@ -301,7 +301,7 @@ namespace RuntimeMeshSlicing
             float intersectionT = Mathf.Abs(denominator) > 0.00000001f ? startDistance / denominator : 0.5f;
             intersectionT = Mathf.Clamp01(intersectionT);
             SliceVertex intersection = SliceVertex.Interpolate(start, end, intersectionT);
-            Vector3 snappedPosition = localPlane.ClosestPointOnPlane(intersection.position);
+            Vector3 snappedPosition = localPlane.ClosestPointOnPlane(intersection.Position);
 
             return intersection.WithPosition(snappedPosition);
         }
@@ -315,13 +315,13 @@ namespace RuntimeMeshSlicing
             {
                 SliceVertex candidate = source[index];
 
-                if (cleaned.Count == 0 || (candidate.position - cleaned[cleaned.Count - 1].position).sqrMagnitude > epsilonSquared)
+                if (cleaned.Count == 0 || (candidate.Position - cleaned[cleaned.Count - 1].Position).sqrMagnitude > epsilonSquared)
                 {
                     cleaned.Add(candidate);
                 }
             }
 
-            if (cleaned.Count > 1 && (cleaned[0].position - cleaned[cleaned.Count - 1].position).sqrMagnitude <= epsilonSquared)
+            if (cleaned.Count > 1 && (cleaned[0].Position - cleaned[cleaned.Count - 1].Position).sqrMagnitude <= epsilonSquared)
             {
                 cleaned.RemoveAt(cleaned.Count - 1);
             }
@@ -350,7 +350,7 @@ namespace RuntimeMeshSlicing
             {
                 if (signedDistances[vertexIndex] == 0f)
                 {
-                    AddUniquePoint(intersectionPoints, localPlane.ClosestPointOnPlane(vertices[vertexIndex].position), duplicateEpsilon);
+                    AddUniquePoint(intersectionPoints, localPlane.ClosestPointOnPlane(vertices[vertexIndex].Position), duplicateEpsilon);
                 }
             }
 
@@ -366,7 +366,7 @@ namespace RuntimeMeshSlicing
                 }
 
                 SliceVertex intersection = IntersectEdge(vertices[edgeIndex], vertices[nextIndex], distanceA, distanceB, localPlane);
-                AddUniquePoint(intersectionPoints, intersection.position, duplicateEpsilon);
+                AddUniquePoint(intersectionPoints, intersection.Position, duplicateEpsilon);
             }
 
             if (intersectionPoints.Count != 2)

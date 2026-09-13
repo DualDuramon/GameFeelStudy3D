@@ -17,12 +17,12 @@ namespace RuntimeMeshSlicing
             mesh.subMeshCount = 2;
 
             mesh.SetTriangles(
-                data.outerTriangles,
+                data._outerTriangles,
                 0,
                 calculateBounds: false);
 
             mesh.SetTriangles(
-                data.capTriangles,
+                data._capTriangles,
                 1,
                 calculateBounds: false);
 
@@ -40,11 +40,11 @@ namespace RuntimeMeshSlicing
             mesh.subMeshCount = 1;
 
             List<int> combinedTriangles = new(
-                data.outerTriangles.Count +
-                data.capTriangles.Count);
+                data._outerTriangles.Count +
+                data._capTriangles.Count);
 
-            combinedTriangles.AddRange(data.outerTriangles);
-            combinedTriangles.AddRange(data.capTriangles);
+            combinedTriangles.AddRange(data._outerTriangles);
+            combinedTriangles.AddRange(data._capTriangles);
 
             mesh.SetTriangles(
                 combinedTriangles,
@@ -68,9 +68,9 @@ namespace RuntimeMeshSlicing
                         : IndexFormat.UInt16
             };
 
-            mesh.SetVertices(data.vertices);
-            mesh.SetNormals(data.normals);
-            mesh.SetUVs(0, data.uvs);
+            mesh.SetVertices(data._vertices);
+            mesh.SetNormals(data._normals);
+            mesh.SetUVs(0, data._uvs);
 
             return mesh;
         }
@@ -82,27 +82,27 @@ namespace RuntimeMeshSlicing
                 throw new ArgumentNullException(nameof(data));
             }
 
-            if (data.vertices.Count == 0)
+            if (data._vertices.Count == 0)
             {
                 throw new InvalidOperationException(
                     "The mesh side contains no vertices.");
             }
 
-            if (data.vertices.Count != data.normals.Count ||
-                data.vertices.Count != data.uvs.Count)
+            if (data._vertices.Count != data._normals.Count ||
+                data._vertices.Count != data._uvs.Count)
             {
                 throw new InvalidOperationException(
                     "Vertex, normal, and UV counts do not match.");
             }
 
             ValidateTriangleIndices(
-                data.outerTriangles,
-                data.vertices.Count,
+                data._outerTriangles,
+                data._vertices.Count,
                 "outer");
 
             ValidateTriangleIndices(
-                data.capTriangles,
-                data.vertices.Count,
+                data._capTriangles,
+                data._vertices.Count,
                 "cap");
         }
 

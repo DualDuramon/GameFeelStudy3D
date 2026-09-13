@@ -25,13 +25,13 @@ namespace RuntimeMeshSlicing
     public struct SliceSettings
     {
         [Min(0.0000001f)]
-        public float distanceEpsilon;
+        public float DistanceEpsilon;
 
         [Min(0.0000001f)]
-        public float duplicatePositionEpsilon;
+        public float DuplicatePositionEpsilon;
 
         [Min(0.000000000001f)]
-        public float minimumTriangleAreaSquared;
+        public float MinimumTriangleAreaSquared;
 
         public static SliceSettings Default
         {
@@ -39,9 +39,9 @@ namespace RuntimeMeshSlicing
             {
                 return new SliceSettings
                 {
-                    distanceEpsilon = 0.00001f,
-                    duplicatePositionEpsilon = 0.0001f,
-                    minimumTriangleAreaSquared = 0.000000000001f
+                    DistanceEpsilon = 0.00001f,
+                    DuplicatePositionEpsilon = 0.0001f,
+                    MinimumTriangleAreaSquared = 0.000000000001f
                 };
             }
         }
@@ -50,69 +50,59 @@ namespace RuntimeMeshSlicing
         {
             return new SliceSettings
             {
-                distanceEpsilon = Mathf.Max(distanceEpsilon, 0.0000001f),
-                duplicatePositionEpsilon =
-                    Mathf.Max(duplicatePositionEpsilon, 0.0000001f),
-                minimumTriangleAreaSquared =
-                    Mathf.Max(minimumTriangleAreaSquared, 0.000000000001f)
+                DistanceEpsilon = Mathf.Max(DistanceEpsilon, 0.0000001f),
+                DuplicatePositionEpsilon = Mathf.Max(DuplicatePositionEpsilon, 0.0000001f),
+                MinimumTriangleAreaSquared = Mathf.Max(MinimumTriangleAreaSquared, 0.000000000001f)
             };
         }
     }
 
     public readonly struct SliceRequest
     {
-        public readonly Vector3 contactPointWorld;
-        public readonly Vector3 bladeAxisWorld;
-        public readonly Vector3 swingDirectionWorld;
-        public readonly Vector3 planeNormalWorld;
-        public readonly float impactSpeed;
+        public readonly Vector3 ContactPointWorld;
+        public readonly Vector3 CladeAxisWorld;
+        public readonly Vector3 CwingDirectionWorld;
+        public readonly Vector3 PlaneNormalWorld;
+        public readonly float ImpactSpeed;
 
-        public SliceRequest(
-            Vector3 contactPointWorld,
-            Vector3 bladeAxisWorld,
-            Vector3 swingDirectionWorld,
-            Vector3 planeNormalWorld,
-            float impactSpeed)
+        public SliceRequest(Vector3 contactPointWorld, Vector3 bladeAxisWorld, Vector3 swingDirectionWorld, Vector3 planeNormalWorld, float impactSpeed)
         {
-            this.contactPointWorld = contactPointWorld;
-            this.bladeAxisWorld = bladeAxisWorld;
-            this.swingDirectionWorld = swingDirectionWorld;
-            this.planeNormalWorld = planeNormalWorld;
-            this.impactSpeed = impactSpeed;
+            ContactPointWorld = contactPointWorld;
+            CladeAxisWorld = bladeAxisWorld;
+            CwingDirectionWorld = swingDirectionWorld;
+            PlaneNormalWorld = planeNormalWorld;
+            ImpactSpeed = impactSpeed;
         }
     }
 
     public readonly struct SliceVertex
     {
-        public readonly Vector3 position;
-        public readonly Vector3 normal;
-        public readonly Vector2 uv;
+        public readonly Vector3 Position;
+        public readonly Vector3 Normal;
+        public readonly Vector2 Uv;
 
         public SliceVertex(Vector3 position, Vector3 normal, Vector2 uv)
         {
-            this.position = position;
-            this.normal = normal;
-            this.uv = uv;
+            Position = position;
+            Normal = normal;
+            Uv = uv;
         }
 
         public SliceVertex WithPosition(Vector3 newPosition)
         {
-            return new SliceVertex(newPosition, normal, uv);
+            return new SliceVertex(newPosition, Normal, Uv);
         }
 
-        public static SliceVertex Interpolate(
-            SliceVertex start,
-            SliceVertex end,
-            float interpolationT)
+        public static SliceVertex Interpolate(SliceVertex start, SliceVertex end, float interpolationT)
         {
             Vector3 interpolatedPosition = Vector3.LerpUnclamped(
-                start.position,
-                end.position,
+                start.Position,
+                end.Position,
                 interpolationT);
 
             Vector3 interpolatedNormal = Vector3.LerpUnclamped(
-                start.normal,
-                end.normal,
+                start.Normal,
+                end.Normal,
                 interpolationT);
 
             if (interpolatedNormal.sqrMagnitude > 0.00000001f)
@@ -121,18 +111,15 @@ namespace RuntimeMeshSlicing
             }
             else
             {
-                interpolatedNormal = start.normal.normalized;
+                interpolatedNormal = start.Normal.normalized;
             }
 
             Vector2 interpolatedUv = Vector2.LerpUnclamped(
-                start.uv,
-                end.uv,
+                start.Uv,
+                end.Uv,
                 interpolationT);
 
-            return new SliceVertex(
-                interpolatedPosition,
-                interpolatedNormal,
-                interpolatedUv);
+            return new SliceVertex(interpolatedPosition, interpolatedNormal, interpolatedUv);
         }
     }
 
@@ -150,47 +137,32 @@ namespace RuntimeMeshSlicing
 
     public sealed class MeshSideData
     {
-        internal readonly List<Vector3> vertices = new();
-        internal readonly List<Vector3> normals = new();
-        internal readonly List<Vector2> uvs = new();
-        internal readonly List<int> outerTriangles = new();
-        internal readonly List<int> capTriangles = new();
+        internal readonly List<Vector3> _vertices = new();
+        internal readonly List<Vector3> _normals = new();
+        internal readonly List<Vector2> _uvs = new();
+        internal readonly List<int> _outerTriangles = new();
+        internal readonly List<int> _capTriangles = new();
 
-        private readonly float minimumTriangleAreaSquared;
+        private readonly float _minimumTriangleAreaSquared;
 
         internal MeshSideData(float minimumTriangleAreaSquared)
         {
-            this.minimumTriangleAreaSquared = minimumTriangleAreaSquared;
+            _minimumTriangleAreaSquared = minimumTriangleAreaSquared;
         }
 
-        public int VertexCount => vertices.Count;
-        public int OuterTriangleCount => outerTriangles.Count / 3;
-        public int CapTriangleCount => capTriangles.Count / 3;
-        public int TotalTriangleCount =>
-            OuterTriangleCount + CapTriangleCount;
+        public int VertexCount => _vertices.Count;
+        public int OuterTriangleCount => _outerTriangles.Count / 3;
+        public int CapTriangleCount => _capTriangles.Count / 3;
+        public int TotalTriangleCount => OuterTriangleCount + CapTriangleCount;
 
-        internal bool AddOuterTriangle(
-            SliceVertex vertexA,
-            SliceVertex vertexB,
-            SliceVertex vertexC)
+        internal bool AddOuterTriangle(SliceVertex vertexA, SliceVertex vertexB, SliceVertex vertexC)
         {
-            return AddTriangle(
-                vertexA,
-                vertexB,
-                vertexC,
-                outerTriangles);
+            return AddTriangle(vertexA, vertexB, vertexC, _outerTriangles);
         }
 
-        internal bool AddCapTriangle(
-            SliceVertex vertexA,
-            SliceVertex vertexB,
-            SliceVertex vertexC)
+        internal bool AddCapTriangle(SliceVertex vertexA, SliceVertex vertexB, SliceVertex vertexC)
         {
-            return AddTriangle(
-                vertexA,
-                vertexB,
-                vertexC,
-                capTriangles);
+            return AddTriangle(vertexA, vertexB, vertexC, _capTriangles);
         }
 
         internal bool AddSurfaceTriangle(SliceVertex vertexA, SliceVertex vertexB, SliceVertex vertexC, bool isCutSurface)
@@ -198,41 +170,36 @@ namespace RuntimeMeshSlicing
             return isCutSurface ? AddCapTriangle(vertexA, vertexB, vertexC) : AddOuterTriangle(vertexA, vertexB, vertexC);
         }
 
-        private bool AddTriangle(
-            SliceVertex vertexA,
-            SliceVertex vertexB,
-            SliceVertex vertexC,
-            List<int> destinationTriangles)
+        private bool AddTriangle(SliceVertex vertexA, SliceVertex vertexB, SliceVertex vertexC, List<int> destinationTriangles)
         {
-            if (!SlicingMath.IsFinite(vertexA.position) ||
-                !SlicingMath.IsFinite(vertexB.position) ||
-                !SlicingMath.IsFinite(vertexC.position))
+            if (!SlicingMath.IsFinite(vertexA.Position) ||
+                !SlicingMath.IsFinite(vertexB.Position) ||
+                !SlicingMath.IsFinite(vertexC.Position))
             {
                 return false;
             }
 
-            Vector3 edgeAB = vertexB.position - vertexA.position;
-            Vector3 edgeAC = vertexC.position - vertexA.position;
+            Vector3 edgeAB = vertexB.Position - vertexA.Position;
+            Vector3 edgeAC = vertexC.Position - vertexA.Position;
 
-            if (Vector3.Cross(edgeAB, edgeAC).sqrMagnitude <=
-                minimumTriangleAreaSquared)
+            if (Vector3.Cross(edgeAB, edgeAC).sqrMagnitude <= _minimumTriangleAreaSquared)
             {
                 return false;
             }
 
-            int firstIndex = vertices.Count;
+            int firstIndex = _vertices.Count;
 
-            vertices.Add(vertexA.position);
-            vertices.Add(vertexB.position);
-            vertices.Add(vertexC.position);
+            _vertices.Add(vertexA.Position);
+            _vertices.Add(vertexB.Position);
+            _vertices.Add(vertexC.Position);
 
-            normals.Add(vertexA.normal);
-            normals.Add(vertexB.normal);
-            normals.Add(vertexC.normal);
+            _normals.Add(vertexA.Normal);
+            _normals.Add(vertexB.Normal);
+            _normals.Add(vertexC.Normal);
 
-            uvs.Add(vertexA.uv);
-            uvs.Add(vertexB.uv);
-            uvs.Add(vertexC.uv);
+            _uvs.Add(vertexA.Uv);
+            _uvs.Add(vertexB.Uv);
+            _uvs.Add(vertexC.Uv);
 
             destinationTriangles.Add(firstIndex);
             destinationTriangles.Add(firstIndex + 1);
@@ -260,9 +227,7 @@ namespace RuntimeMeshSlicing
 
         public bool Succeeded => FailureReason == SliceFailureReason.None;
 
-        internal void Fail(
-            SliceFailureReason failureReason,
-            string message)
+        internal void Fail(SliceFailureReason failureReason, string message)
         {
             FailureReason = failureReason;
             Message = message;
@@ -277,12 +242,7 @@ namespace RuntimeMeshSlicing
         public Plane LocalPlane { get; }
         public SliceDiagnostics Diagnostics { get; }
 
-        internal SliceGeometry(
-            MeshSideData positive,
-            MeshSideData negative,
-            List<Vector3> contourLocal,
-            Plane localPlane,
-            SliceDiagnostics diagnostics)
+        internal SliceGeometry(MeshSideData positive, MeshSideData negative, List<Vector3> contourLocal, Plane localPlane, SliceDiagnostics diagnostics)
         {
             Positive = positive;
             Negative = negative;

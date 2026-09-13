@@ -147,7 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d57f9b06aebbe74295000d3835896d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraShakeSignalSender
-  _shakeDuration: 0.2
+  _shakeDuration: 0.1
   _shakeStrength: 0.5
 --- !u!135 &1157449311511136596
 SphereCollider:
