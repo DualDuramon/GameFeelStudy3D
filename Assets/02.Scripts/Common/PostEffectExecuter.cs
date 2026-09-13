@@ -10,14 +10,14 @@ public class PostEffectExecuter : MonoBehaviour
     [SerializeField] private GameObject _hitEffectPrefab;
 
 
-    public void ExecutePostEffects(Vector3 position, Quaternion rotation, bool shakeCamera = true)
+    public void ExecutePostEffects(Vector3 position, Quaternion rotation, bool shakeCamera = true, bool spawnHitEffect = true)
     {
         if (shakeCamera)
         {
             ShakeCamera(_shakeDuration, _shakeStrength);
         }
 
-        if (_hitEffectPrefab != null)
+        if (_hitEffectPrefab != null && spawnHitEffect)
         {
             Instantiate(_hitEffectPrefab, position, rotation);
         }

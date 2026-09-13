@@ -10,6 +10,9 @@ namespace RuntimeMeshSlicing
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class SliceableSphere : MonoBehaviour
     {
+        public static bool GeneratePiece = true;
+        public static bool GenerateJuices = true;
+
         private enum SliceState
         {
             Ready,
@@ -81,6 +84,11 @@ namespace RuntimeMeshSlicing
 
         public bool TrySlice(in SliceRequest request)
         {
+            if(!GeneratePiece)
+            {
+                LastMessage = "SliceableSphere.GeneratePiece is disabled.";
+                return false;
+            }
             if (_state != SliceState.Ready)
             {
                 LastMessage = "This object is already slicing or has been sliced.";
@@ -200,7 +208,7 @@ namespace RuntimeMeshSlicing
 
                 if(_postEffectExecuter != null)
                 {
-                    _postEffectExecuter.ExecutePostEffects(request.contactPointWorld, Quaternion.LookRotation(request.planeNormalWorld), true);
+                    _postEffectExecuter.ExecutePostEffects(request.contactPointWorld, Quaternion.LookRotation(request.planeNormalWorld), true, GenerateJuices);
                 }
                 gameObject.SetActive(false);
                 return true;

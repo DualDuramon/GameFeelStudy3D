@@ -11,8 +11,6 @@ public class PlayerMeshSlicer : MonoBehaviour
     [SerializeField] private const string Attack_Trigger_Name = "AttackTrigger";
     private bool _canAttack = true;
 
-    [Header("Camera Shaker")]
-    [SerializeField] private CameraShakeSignalSender _cameraShakeSignalSender;
 
     private void Awake()
     {

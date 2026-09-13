@@ -1,19 +1,20 @@
+using RuntimeMeshSlicing;
 using UnityEngine;
 
-public class SpawnManager : MonoBehaviour
+public class FruitSpawnManager : MonoBehaviour
 {
-    private static SpawnManager _instance;
+    private static FruitSpawnManager _instance;
 
     [SerializeField] private Transform[] _spawnPoints;
     [SerializeField] private GameObject[] _spawnPrefabs;
 
-    public SpawnManager Instance
+    public FruitSpawnManager Instance
     {
         get
         {
             if(_instance == null)
             {
-                _instance = FindFirstObjectByType<SpawnManager>();
+                _instance = FindFirstObjectByType<FruitSpawnManager>();
             }
             return _instance;
         }
@@ -54,5 +55,25 @@ public class SpawnManager : MonoBehaviour
         GameObject prefabToSpawn = _spawnPrefabs[prefabIndex];
 
         Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
+    }
+
+    public void ToggleGeneratePiece()
+    {
+        SliceableSphere.GeneratePiece = !SliceableSphere.GeneratePiece;
+    }
+
+    public void ToggleGenerateJuices()
+    {
+        SliceableSphere.GenerateJuices = !SliceableSphere.GenerateJuices;
+    }
+
+    public void ClearAllFruits()
+    {
+
+        GameObject[] fruits = GameObject.FindGameObjectsWithTag("Fruit");
+        foreach (var fruit in fruits)
+        {
+            Destroy(fruit);
+        }
     }
 }
