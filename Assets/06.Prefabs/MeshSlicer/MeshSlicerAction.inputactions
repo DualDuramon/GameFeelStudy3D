@@ -1,0 +1,57 @@
+{
+    "version": 1,
+    "name": "MeshSlicerAction",
+    "maps": [
+        {
+            "name": "MeshSlicer",
+            "id": "7dc530b0-fa7b-436d-b8c9-0713cd702e2b",
+            "actions": [
+                {
+                    "name": "NormalAttack",
+                    "type": "Button",
+                    "id": "bcbfe193-9878-497a-9512-faff3602ee30",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "EscInput",
+                    "type": "Button",
+                    "id": "934b14a8-cad8-44f1-a331-6f6a11fa5334",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c3ab1291-56b5-4bc0-9a86-125a7ac1712c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "NormalAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b14b0bd9-9654-4464-81b7-ef178bf38186",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EscInput",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

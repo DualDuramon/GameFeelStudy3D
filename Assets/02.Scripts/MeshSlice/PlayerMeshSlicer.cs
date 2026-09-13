@@ -1,0 +1,59 @@
+using UnityEngine;
+using RuntimeMeshSlicing;
+
+public class PlayerMeshSlicer : MonoBehaviour
+{
+    [SerializeField] private PlayerMeshSlicerInput _input;
+    [SerializeField] private AnimatedBladeSlicer[] _bladesSlicer;
+
+    [Header("Animation Settings")]
+    [SerializeField] private Animator _animator;
+    [SerializeField] private const string Attack_Trigger_Name = "AttackTrigger";
+    private bool _canAttack = true;
+
+
+    private void Awake()
+    {
+        _animator = GetComponent<Animator>();
+        _bladesSlicer = GetComponentsInChildren<AnimatedBladeSlicer>();
+    }
+
+    private void OnEnable()
+    {
+        _input.OnNormalAttackEvent += HandleLeftClick;
+    }
+
+    private void OnDisable()
+    {
+        _input.OnNormalAttackEvent -= HandleLeftClick;
+    }
+
+    private void HandleLeftClick()
+    {
+        if(!_input.IsMouseClickLocked && _canAttack)
+        {
+            _animator.SetTrigger(Attack_Trigger_Name);
+        }
+    }
+
+    // Animation Event에서 호출할 함수들
+    public void BeginBladeWindow()
+    {
+        foreach (AnimatedBladeSlicer slicer in _bladesSlicer)
+        {
+            slicer.BeginSliceWindow();
+        }
+    }
+    public void EndBladeWindow()
+    {
+        foreach (AnimatedBladeSlicer slicer in _bladesSlicer)
+        {
+            slicer.EndSliceWindow();
+        }
+    }
+
+    public void ToggleAttackFlag()
+    {
+        _canAttack = !_canAttack;
+    }
+}
